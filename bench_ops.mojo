@@ -1,25 +1,22 @@
 # ===----------------------------------------------------------------------=== #
-# MojoLlama — Ops benchmark (v3)
+# MojoLlama - Ops benchmark (Mojo 1.0 Modernized)
 # ===----------------------------------------------------------------------=== #
 
 from std.python import Python
 from std.math import rsqrt, exp
 from std.time import perf_counter
 
-
-fn silu_scalar(x: Float32) -> Float32:
+def silu_scalar(x: Float32) -> Float32:
     return x / (1 + exp(-x))
 
-
-fn rmsnorm_element(x: Float32, weight: Float32, eps: Float32) -> Float32:
+def rmsnorm_element(x: Float32, weight: Float32, eps: Float32) -> Float32:
     return x / rsqrt(x * x + eps) * weight
 
-
-fn main() raises:
+def main() raises:
     var np = Python.evaluate("__import__('numpy')")
     
-    print("MojoLlama — Ops Benchmark")
-    print("=" * 50)
+    print("MojoLlama - Ops Benchmark (Mojo 1.0)")
+    print("==================================================")
     
     var n = 2048
     var x_py = np.random.randn(n).astype(np.float32)
@@ -49,12 +46,11 @@ fn main() raises:
     
     # Benchmark RMSNorm
     print("\n2. RMSNorm (1x2048 x 500)")
-    var n2 = Python.evaluate("2048")
-    var b1 = Python.evaluate("1")
-    var x2_py = np.random.randn(b1, n2).astype(np.float32)
-    var w_py = np.ones(n2, np.float32)
+    var x2_py = np.random.randn(1, 2048).astype(np.float32)
+    var w_py = np.ones(2048, np.float32)
     var eps_f = Float32(1.0e-6)
-    var out2_py = np.zeros(b1, n2).astype(np.float32)
+    var shape = Python.evaluate("(1, 2048)")
+    var out2_py = np.zeros(shape, np.float32)
     
     # Mojo
     t0 = perf_counter()
@@ -72,10 +68,10 @@ fn main() raises:
     var rn_mojo_ms = (t1 - t0) * 1000.0
     
     # NumPy
+    var np_rmsnorm = Python.evaluate("lambda x, w, eps: x / __import__('numpy').sqrt(__import__('numpy').mean(x**2, axis=-1, keepdims=True) + eps) * w")
     t0 = perf_counter()
     for _ in range(500):
-        var v = np.mean((x2_py.astype(np.float64)) ** 2, Python.evaluate("-1"), Python.evaluate("True"))
-        _ = x2_py / (v + 1.0e-6).__call__("sqrt") * w_py
+        _ = np_rmsnorm(x2_py, w_py, 1.0e-6)
     t1 = perf_counter()
     var rn_np_ms = (t1 - t0) * 1000.0
     

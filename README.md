@@ -4,7 +4,7 @@
   <img src="www/logo.png" alt="MojoLlama Logo" width="200">
 </p>
 
-**High‑throughput CPU LLM inference engine** — GGUF native, MoE-optimized, with a **pure Mojo inference pipeline** and full Studio suite.
+**High‑throughput CPU LLM inference engine**: GGUF native, MoE-optimized, with a **pure Mojo inference pipeline** and full Studio suite.
 
 ![Mojo](https://img.shields.io/badge/Mojo-2024.9-6C3CE1?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square) ![C](https://img.shields.io/badge/C-AVX2%2B%20OMP-green?style=flat-square) ![GGUF](https://img.shields.io/badge/Format-GGUF-green?style=flat-square) ![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey?style=flat-square)
 
@@ -16,9 +16,9 @@ MojoLlama is a CPU-first inference engine that provides **two engines** for diff
 
 ### 1. Pure Mojo Engine (NEW)
 A **zero-C, zero-Python** inference pipeline written entirely in Mojo. Uses Mojo's SIMD + `parallelize` for all compute kernels with C libc imports only for I/O (`malloc`, `open`, `read`). Features:
-- **Q8_0 quantized matmul** — int8→float32 SIMD decode with FMA fusion
-- **Batched inference** — 1–8 concurrent sequences via comptime dispatch
-- **Full architecture support** — GQA attention, RoPE, RMS norm, SiLU activations
+- **Q8_0 quantized matmul**: int8→float32 SIMD decode with FMA fusion
+- **Batched inference**: 1-8 concurrent sequences via comptime dispatch
+- **Full architecture support**: GQA attention, RoPE, RMS norm, SiLU activations
 - **Running on real models**:
   - **TinyLlama-1.1B** f16/Q8_0: **27.2 tok/s** (verified correct output)
   - **ZAYA1-8B** Q8_0 (MoE, 80 layers, 16 experts): **28.6 tok/s** (real English text output)
@@ -43,7 +43,7 @@ bash build_zaya.sh
 LD_LIBRARY_PATH="..." ./zaya_gen_q8 32
 ```
 
-All matmul kernels are pure Mojo — no C bridge. See `zaya_gen_q8.mojo` (~700 lines) for the complete reference implementation.
+All matmul kernels are pure Mojo (no C bridge). See `zaya_gen_q8.mojo` (~700 lines) for the complete reference implementation.
 
 ---
 
@@ -51,13 +51,13 @@ All matmul kernels are pure Mojo — no C bridge. See `zaya_gen_q8.mojo` (~700 l
 
 | Model | Engine | Config | tok/s | vs llama.cpp |
 |-------|--------|--------|-------|-------------|
-| **TinyLlama 1.1B** f16 | **Pure Mojo** | B=4 × 32 thr | **27.2** | — |
-| **TinyLlama 1.1B** Q8_0 | **Pure Mojo** | B=4 × 32 thr | **88.1** | — |
-| **ZAYA1-8B** Q8_0 | **Pure Mojo** | 80L, 16 experts, top-1 | **28.6** 🏆 | — |
+| **TinyLlama 1.1B** f16 | **Pure Mojo** | B=4 × 32 thr | **27.2** | - |
+| **TinyLlama 1.1B** Q8_0 | **Pure Mojo** | B=4 × 32 thr | **88.1** | - |
+| **ZAYA1-8B** Q8_0 | **Pure Mojo** | 80L, 16 experts, top-1 | **28.6** 🏆 | - |
 | GPT-OSS-20B Q4_K_M | Python TurboEngine | 1 user | 25.5 | **0.94×** |
 | Qwen3.6-35B MXFP4 | Python TurboEngine | 1 user | 25.5 | **1.57×** |
 | Qwen3.6-35B MXFP4 | C batch_forward | B=10 × 128 prompt | 17.0 | 1.06× |
-| Qwen3.6-35B MXFP4 | Concurrent server (spawn) | 10 workers × 3 thr | **47.0 agg** | — |
+| Qwen3.6-35B MXFP4 | Concurrent server (spawn) | 10 workers × 3 thr | **47.0 agg** | - |
 | TinyLlama 1.1B Q4_0 | Python TurboEngine | 1 user | 79.2 | 0.89× |
 | Qwen3-30B-A3B Q4_K_M | Python TurboEngine | 1 user | 22.5 | 0.89× |
 
@@ -70,15 +70,15 @@ All matmul kernels are pure Mojo — no C bridge. See `zaya_gen_q8.mojo` (~700 l
 | `zaya_gen_q8.mojo` | ZAYA1-8B | Q8_0 | **28.6** | **~700** |
 
 **Architecture support (pure Mojo):**
-- **Dense models**: TinyLlama (22L, GQA, RoPE, SiLU) — proven
-- **MoE models**: ZAYA1-8B (80 alt attn/MoE layers, 16 experts, top-1 routing, CCA) — proven
-- 262K vocab with weight-tying, partial RoPE, learned residual scales — all in Mojo
+- **Dense models**: TinyLlama (22L, GQA, RoPE, SiLU): proven
+- **MoE models**: ZAYA1-8B (80 alt attn/MoE layers, 16 experts, top-1 routing, CCA): proven
+- 262K vocab with weight-tying, partial RoPE, learned residual scales: all in Mojo
 
 ---
 
 ## 🧠 C Engine (`kernels/cengine_batch_instr.c`)
 
-The C engine is the core performance layer — a single `.c` file (~1000 lines) with AVX2+OMP-accelerated operations:
+The C engine is the core performance layer: a single `.c` file (~1000 lines) with AVX2+OMP-accelerated operations:
 
 **Quantized Matmul Types:**
 | Type | Block Size | Operations |
@@ -91,11 +91,11 @@ The C engine is the core performance layer — a single `.c` file (~1000 lines) 
 | **MXFP4** | 32 elems | 4-bit two's complement + E8M0 scale |
 
 **Key Components:**
-- `batch_forward()` — single C call for entire forward pass
-- `moe_ffn()` — MoE FFN dispatch with per-expert quant matmul
-- `ssm_decode_step()` — Mamba-2-like selective scan kernel
-- `gqa()` — Grouped Query Attention with softmax + weighted sum
-- `PagedAttention` — page table with KV block allocation
+- `batch_forward()`: single C call for entire forward pass
+- `moe_ffn()`: MoE FFN dispatch with per-expert quant matmul
+- `ssm_decode_step()`: Mamba-2-like selective scan kernel
+- `gqa()`: Grouped Query Attention with softmax + weighted sum
+- `PagedAttention`: page table with KV block allocation
 
 ---
 
@@ -116,7 +116,7 @@ Zero-allocation Python engine with C-accelerated MoE support:
 Two approaches for multi-user throughput:
 
 ### Multiprocessing spawn (best)
-`server_concurrent_qwen36.py` — workers share weight pages via OS page cache:
+`server_concurrent_qwen36.py`: workers share weight pages via OS page cache:
 
 | Workers × OMP thr | Per-worker | Aggregate | CPU util |
 |-------------------|-----------|-----------|----------|
@@ -131,15 +131,15 @@ Two approaches for multi-user throughput:
 ### Near-term
 - **Batch inference** for ZAYA1-8B (B=4, currently B=1)
 - **Q8_0 input quantization** in C engine
-- **True continuous batching** — merge B users' MoE routing
+- **True continuous batching**: merge B users' MoE routing
 
 ### Medium-term
-- **MAX GPU backend** — zero-copy tensor dispatch to NVIDIA GPUs
-- **Speculative decoding** — TinyLlama draft + ZAYA target
-- **Prefix caching** — LRU with SHA-256 hash
+- **MAX GPU backend**: zero-copy tensor dispatch to NVIDIA GPUs
+- **Speculative decoding**: TinyLlama draft + ZAYA target
+- **Prefix caching**: LRU with SHA-256 hash
 
 ### Long-term
-- **Full GGUF quant pipeline** — imatrix → dynamic 2-bit quantization
+- **Full GGUF quant pipeline**: imatrix → dynamic 2-bit quantization
 - **MojoLlama Studio** as Unsloth+LLaMA-Factory replacement
 - **Perplexity evaluation**
 

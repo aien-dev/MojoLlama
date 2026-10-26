@@ -206,4 +206,4 @@ To add a new architecture:
 
 ## License
 
-MIT
+Apache-2.0 (see the repository LICENSE)

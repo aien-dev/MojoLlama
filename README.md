@@ -1,5 +1,7 @@
 # MojoLlama
 
+> Archived 2026-10-15: AIEN dropped Mojo/MAX. Read-only history; the eval runners live on in aien-dev/aien-yardsticks (`yardsticks/mojollama-eval-runners`).
+
 <p align="center">
   <img src="www/logo.png" alt="MojoLlama Logo" width="200">
 </p>

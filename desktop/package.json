@@ -2,11 +2,11 @@
   "name": "mojollama-studio",
   "version": "0.2.0",
   "description": "MojoLlama Studio — Desktop application wrapper for MojoLlama AI inference engine",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "main": "main.js",
   "author": {
     "name": "MojoLlama",
-    "email": "dev@mojollama.ai"
+    "email": "aien@aienos.com"
   },
   "repository": {
     "type": "git",
@@ -64,7 +64,7 @@
       ],
       "category": "Development",
       "icon": "icons/icon.png",
-      "maintainer": "MojoLlama <dev@mojollama.ai>",
+      "maintainer": "MojoLlama <aien@aienos.com>",
       "synopsis": "MojoLlama Studio — LLM inference desktop app",
       "description": "Desktop wrapper for MojoLlama, a high-performance LLM inference engine combining GGUF support, continuous batching, and PagedAttention.",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
